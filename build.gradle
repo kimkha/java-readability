@@ -2,6 +2,7 @@ group 'com.kimkha.readability'
 version '0.1'
 
 apply plugin: 'java'
+apply plugin: 'maven'
 
 sourceCompatibility = 1.5
 
@@ -15,4 +16,23 @@ dependencies {
     compile 'org.jsoup:jsoup:1.8.3'
     compile 'org.apache.logging.log4j:log4j-core:2.4.1'
     testCompile 'com.squareup.okhttp:okhttp:2.5.0'
+}
+
+task createPom << {
+    pom {
+        project {
+            groupId 'com.kimkha.readability'
+            artifactId 'java-readability'
+            version '0.1'
+
+            inceptionYear '2015'
+            licenses {
+                license {
+                    name 'The Apache Software License, Version 2.0'
+                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    distribution 'repo'
+                }
+            }
+        }
+    }.writeTo("pom.xml")
 }
