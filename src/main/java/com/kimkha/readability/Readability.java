@@ -112,13 +112,13 @@ public class Readability {
         for (int i = scripts.size() - 1; i >= 0; i--) {
             Element e = scripts.get(i);
             String src = e.attr("src");
-            if ("".equals(src) || (src.indexOf("readability") == -1 && src.indexOf("typekit") == -1)) {
+            if ("".equals(src) || (!src.contains("readability") && !src.contains("typekit"))) {
                 e.remove();
             }
         }
     }
 
-    //some pages have a <p></p> combiantion to generate a space, but
+    //some pages have a <p></p> combination to generate a space, but
     //readability seems to ignore it.  convert then to a single <p>
     private void handlePP() {
         String inner = document.body().html();
@@ -132,9 +132,9 @@ public class Readability {
             // we hope that there's a 'p' up there....
             Elements parents = br.parents();
             Element parent = null;
-            for (Element aparent : parents) {
-                if (aparent.tag().getName().equals("p")) {
-                    parent = aparent;
+            for (Element p : parents) {
+                if (p.tag().getName().equals("p")) {
+                    parent = p;
                     break;
                 }
             }
@@ -222,7 +222,7 @@ public class Readability {
             // this happens when the content of the page is very short.
             // we don't believe in super-short next pages.
             articleText = body.text();
-        } else {
+        } else if (articleContent != null) {
             xmlImages.add(articleContent.outerHtml());
             articleText = getDisplayText(articleContent);
         }
@@ -571,7 +571,7 @@ public class Readability {
             if (append) {
                 Log.d(TAG, "Appending node: [" + siblingNode.getClass() + "]");
 
-                Element nodeToAppend = null;
+                Element nodeToAppend;
                 if (!"div".equals(siblingNode.tagName()) && !"p".equals(siblingNode.tagName())) {
                     /*
                      * We have a node that isn't a common block level element, like a form or td tag. Turn it
@@ -852,7 +852,7 @@ public class Readability {
             if (curTitle.split(" ").length < 3) {
                 curTitle = origTitle.replaceAll("[^\\|\\-]*[\\|\\-](.*)", "$1");
             }
-        } else if (curTitle.indexOf(": ") != -1) {
+        } else if (curTitle.contains(": ")) {
             curTitle = origTitle.replaceAll(".*:(.*)", "$1");
 
             if (curTitle.split(" ").length < 3) {
@@ -879,7 +879,7 @@ public class Readability {
             return base.toString();
         } catch (URISyntaxException e) {
             Log.d(TAG, "Failed to get base URI", e);
-            return null;
+            return "";
         }
     }
 
@@ -909,7 +909,7 @@ public class Readability {
             String segment = urlSlashes.get(i);
 
             // Split off and save anything that looks like a file type.
-            if (segment.indexOf(".") != -1) {
+            if (segment.contains(".")) {
                 possibleType = segment.split("\\.")[1];
 
                 /*
@@ -924,7 +924,7 @@ public class Readability {
              * EW-CMS specific segment replacement. Ugly. Example:
              * http://www.ew.com/ew/article/0,,20313460_20369436,00.html
              **/
-            if (segment.indexOf(",00") != -1) {
+            if (segment.contains(",00")) {
                 segment = segment.replaceFirst(",00", "");
             }
 
@@ -947,7 +947,7 @@ public class Readability {
             }
 
             /* If this is the first segment and it's just "index", remove it. */
-            if (i == 0 && segment.toLowerCase() == "index")
+            if (i == 0 && segment.toLowerCase().equals("index"))
                 del = true;
 
             /*
@@ -1142,6 +1142,7 @@ public class Readability {
                 linkTextAsNumber = Integer.parseInt(linkText);
                 linkNumeric = true;
             } catch (NumberFormatException e) {
+                Log.w(TAG, e.getMessage());
             }
 
             if (linkNumeric) {
